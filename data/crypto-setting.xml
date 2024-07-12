@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Settings>
+    <ArchiveFormat>ZIP</ArchiveFormat>
+    <CryptoFormat>AES-256</CryptoFormat>
+	<AesKey>b215c35417913394cca2e21cc5ce07d7acbd70bb70084b8560a9b614f4c736be</AesKey>
+	<AesIv>8f8fbfaecd4fc78141203d95ce224a2e</AesIv>
+</Settings>
