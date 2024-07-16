@@ -23,6 +23,10 @@ if (array_key_exists("membership-type", $_POST))
     {
         $result = file_get_contents($backendDir."/data/FeatureLimitationFree.json");
     }
+    else if ($type === "subscription")
+    {
+	$result = file_get_contents($backendDir."/data/FeatureLimitationSubs.json");
+    }
     echo $result;
     
 }

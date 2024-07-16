@@ -22,13 +22,13 @@ $verifier->verify();
 // default status
 http_response_code(400);
 
-if (array_key_exists('processing_time', $_POST)
+if (array_key_exists('metered-value', $_POST)
     && array_key_exists('proc_no', $_POST)) 
 {
     $success = false;
 
     try {
-        $procTime = $_POST['processing_time'];
+        $procTime = $_POST['metered-value'];
         $procNo = $_POST['proc_no'];
     
         $json =file_get_contents($backendDir.'/data/access_keys.json');
