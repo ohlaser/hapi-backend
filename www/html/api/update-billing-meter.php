@@ -22,38 +22,23 @@ $verifier->verify();
 // default status
 http_response_code(400);
 
-if (array_key_exists('metered-value', $_POST)
-    && array_key_exists('proc_no', $_POST)) 
+if (array_key_exists('meter-type', $_POST)
+    && array_key_exists('metered-value', $_POST)
+    && array_key_exists('proc-num', $_POST)) 
 {
     $success = false;
 
     try {
-        $procTime = $_POST['metered-value'];
-        $procNo = $_POST['proc_no'];
-    
-        $json =file_get_contents($backendDir.'/data/access_keys.json');
-        $keys = json_decode($json, true);
-        
-    
-        // OLCに接続して更新
-        $pdo = new PDO(
-            $keys->OLC->dsn, 
-            $keys->OLC->username, 
-            $keys->OLC->password, 
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]);
+        $meterType = $_POST['meter-type'];
+        $meteredValue = $_POST['metered-value'];
+        $procNum = $_POST['proc-num'];
 
-        // 
-        $stmt = $pdo->prepare('SELECT count(*) FROM t_api_auth WHERE api_token = :token');
-        $stmt->execute(['token' => $olcToken]);
+        if ($meterType === 'processing-time') {
+            $success = updateBilledProcessingTime((int)$meteredValue, (int)$procNum);
         
-        // stripe初期化
-        $stripe = new \Stripe\StripeClient([
-            'api_key' => $keys->stripe->secret_key,
-            'stripe_version' => $keys->stripe->api_version]);
+        } else {
+            throw new Exception('invalid argument');
+        }
         
 
     } catch (Exception $e) {
@@ -70,5 +55,44 @@ if (array_key_exists('metered-value', $_POST)
 } else {
     http_response_code(400);
 }
+
+
+/**
+ * 加工時間に関する従量課金処理
+ */
+function updateBilledProcessingTime($procTime, $procNum)
+{
+    $success = false;
+    
+    $json =file_get_contents($backendDir.'/data/access_keys.json');
+    $keys = json_decode($json, true);
+    
+    // stripe初期化
+    $stripe = new \Stripe\StripeClient([
+        'api_key' => $keys->stripe->secret_key,
+        'stripe_version' => $keys->stripe->api_version]);
+
+    // 初回サーチ後は番号とサブスクidの紐づけをolcサーバーに保存してもよいのでは？
+    // オーバーヘッドも減る
+    $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '"']);
+    if (count($subs->data) === 0)
+        throw new Exception('invalid processor number');
+
+    $customerId = $subs->data[0]->customer;
+
+    // 暫定で従量制固定
+    $stripe->billing->meterEvents->create([
+        'event_name' => 'processing_time',
+        'payload' => [
+            'value' => $procTime,
+            'stripe_customer_id' => $customerId,
+        ]
+    ]);
+
+    $success = true;
+
+    return $success;
+}
+
 
 ?>
