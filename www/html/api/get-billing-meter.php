@@ -85,7 +85,7 @@ function getBilledProcessingTime($procNum)
     $invoices = $stripe->invoices->upcoming(['customer' => $customerId]);
 
     foreach ($invoices->lines->data as $invoice) {
-        if ($invoice->price->id !== 'price_1PXbnyDSRUXumGeOhoTJt9Lg') 
+        if ($invoice->price->id !== 'price_1PXbnyDSRUXumGeOhoTJt9Lg') // note: 価格変更が行われた場合はprice_idを追加
             continue;
 
         $result['amount'] = $invoice['amount'];
