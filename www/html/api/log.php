@@ -3,12 +3,15 @@ $backendDir = dirname(__FILE__, 4);
 
 
 
-function writeLog($e, $logFileName, $processorId) {
+function writeLog($logString, $fileName, $processorId) {
+    global $backendDir;
 
-    $fp = fopen($backendDir.'/log/'.$logFileName, 'a');
+    $logString .= "\n";
+
+    $fp = fopen($backendDir.'/log/'.$fileName.'.log', 'a');
     flock($fp, LOCK_EX);
 
-    fwrite($fp, date("Y-m-d H:i:s"). ' proc_no: '. $processorId . ', message: ' . $e);
+    fwrite($fp, date("Y-m-d H:i:s"). ' proc_no: '. $processorId . ', message: ' . $logString);
 
     flock($fp, LOCK_UN);
     fclose($fp);

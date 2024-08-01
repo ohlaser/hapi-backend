@@ -27,11 +27,11 @@ if (array_key_exists('meter-type', $_POST)
     && array_key_exists('proc-num', $_POST)) 
 {
     $success = false;
+    $meterType = $_POST['meter-type'];
+    $meteredValue = $_POST['metered-value'];
+    $procNum = $_POST['proc-num'];
 
     try {
-        $meterType = $_POST['meter-type'];
-        $meteredValue = $_POST['metered-value'];
-        $procNum = $_POST['proc-num'];
 
         if ($meterType === 'processing-time') {
             $success = updateBilledProcessingTime((int)$meteredValue, (int)$procNum);
@@ -42,7 +42,7 @@ if (array_key_exists('meter-type', $_POST)
         
 
     } catch (Exception $e) {
-        writeLog($e, basename(__FILE__));
+        writeLog($e, basename(__FILE__), $procNum);
     }
 
     if ($success) {
@@ -69,8 +69,8 @@ function updateBilledProcessingTime($procTime, $procNum)
     
     // stripe初期化
     $stripe = new \Stripe\StripeClient([
-        'api_key' => $keys->stripe->secret_key,
-        'stripe_version' => $keys->stripe->api_version]);
+        'api_key' => $keys['stripe']['secret_key'],
+        'stripe_version' => $keys['stripe']['api_version']]);
 
     // 初回サーチ後は番号とサブスクidの紐づけをolcサーバーに保存してもよいのでは？
     // オーバーヘッドも減る

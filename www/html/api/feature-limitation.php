@@ -3,7 +3,9 @@
  * HARUKAの機能制限に関する情報を返す。
  */
 $backendDir = dirname(__FILE__, 4);
+
 require_once($backendDir.'/scripts/ApiVerifier.php');
+require_once('log.php');
 
 
 

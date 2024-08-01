@@ -21,10 +21,10 @@ if (array_key_exists('meter-type', $_GET)
     && array_key_exists('proc-num', $_GET)) 
 {
     $result = null;
+    $meterType = $_GET['meter-type'];
+    $procNum = $_GET['proc-num'];
 
     try {
-        $meterType = $_GET['meter-type'];
-        $procNum = $_GET['proc-num'];
         
         if ($meterType === 'processing-time') {
             $result = getBilledProcessingTime((int)$procNum);
@@ -34,7 +34,7 @@ if (array_key_exists('meter-type', $_GET)
         }
 
     } catch (Excepion $e) {
-        writeLog($e, basename(__FILE__));
+        writeLog($e, basename(__FILE__), $procNum);
     }
 
     if ($result) {
@@ -67,8 +67,8 @@ function getBilledProcessingTime($procNum)
     
     // stripe初期化
     $stripe = new \Stripe\StripeClient([
-        'api_key' => $keys->stripe->secret_key,
-        'stripe_version' => $keys->stripe->api_version]);
+        'api_key' => $keys['stripe']['secret_key'],
+        'stripe_version' => $keys['stripe']['api_version']]);
 
     $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '"']);
     if (count($subs->data) === 0)

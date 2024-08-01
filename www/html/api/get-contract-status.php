@@ -15,23 +15,33 @@ $verifier->verify();
 http_response_code(400);
 
 if (array_key_exists('proc-num', $_GET)) 
-{
+{   
+    $result = null;
+    $procNum = $_GET['proc-num'];
+
     try{
-        $procNum = $_GET['proc-num'];
+        $json =file_get_contents($backendDir.'/data/access_keys.json');
+        $keys = json_decode($json, true);
 
         $stripe = new \Stripe\StripeClient([
-            'api_key' => $keys->stripe->secret_key,
-            'stripe_version' => $keys->stripe->api_version]);
+            'api_key' => $keys['stripe']['secret_key'],
+            'stripe_version' => $keys['stripe']['api_version']]);
 
         $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '"']);
         
-        if (count($subs->data))
+        if (count($subs->data)){
+            $result = '1';
             http_response_code(200);
+        }
         else
             http_response_code(204);
 
     } catch (Exception $e) {
-        writeLog($e, basename(__FILE__));
+        writeLog($e, basename(__FILE__), $procNum);
+    }
+
+    if ($result){
+        echo $result;
     }
 }
 
