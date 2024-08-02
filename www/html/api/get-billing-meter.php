@@ -25,24 +25,23 @@ if (array_key_exists('meter-type', $_GET)
     $procNum = $_GET['proc-num'];
 
     try {
-        
         if ($meterType === 'processing-time') {
-            $result = getBilledProcessingTime((int)$procNum);
-        
+            $ret = getBilledProcessingTime((int)$procNum);
+                    
+            if ($ret) {
+                $result = json_encode($ret);
+                http_response_code(200);
+            
+            } else {
+                http_response_code(500);
+                throw new Exception('unexpected error');
+            }
         } else {
             throw new Exception('invalid argument');
         }
 
-    } catch (Excepion $e) {
+    } catch (Exception $e) {
         writeLog($e, basename(__FILE__), $procNum);
-    }
-
-    if ($result) {
-        $result = decode_json($result);
-        http_response_code(200);
-    
-    } else {
-        http_response_code(500);
     }
 
 } else {
@@ -60,6 +59,8 @@ if ($result) {
  */
 function getBilledProcessingTime($procNum) 
 {
+    global $backendDir;
+
     $result = null;
     
     $json =file_get_contents($backendDir.'/data/access_keys.json');
@@ -88,8 +89,8 @@ function getBilledProcessingTime($procNum)
         if ($invoice->price->id !== 'price_1PXbnyDSRUXumGeOhoTJt9Lg') // note: 価格変更が行われた場合はprice_idを追加
             continue;
 
-        $result['amount'] = $invoice['amount'];
-        $result['quantity'] = $invoice['quantity'];
+        $result['Amount'] = (string)$invoice['amount'];
+        $result['Quantity'] = (string)$invoice['quantity'];
     }
 
     return $result;

@@ -62,6 +62,7 @@ if (array_key_exists('meter-type', $_POST)
  */
 function updateBilledProcessingTime($procTime, $procNum)
 {
+    global $backendDir;
     $success = false;
     
     $json =file_get_contents($backendDir.'/data/access_keys.json');
