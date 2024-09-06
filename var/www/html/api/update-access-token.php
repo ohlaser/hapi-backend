@@ -43,74 +43,72 @@ if (array_key_exists('proc-num', $_POST)
             ]);
         $pdo->beginTransaction();
 
-        // 加工機に紐づくトークンの存在確認
-        $sql = <<<SQL
+        
+        // トークンの重複確認
+        $sql2 = <<<SQL
             SELECT
-                proc_no,
-                token
+                proc_no
             FROM
                 t_proc_no_token as pt
             WHERE
-                proc_no = :proc_no
-            FOR UPDATE;
+                token = :token
+                AND
+                NOT proc_no = :proc_no
             SQL;
             
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['proc_no' => $procNum]);
-        $line = $stmt->fetch();
+        $stmt = $pdo->prepare($sql2);
+        $stmt->execute(['proc_no' => $procNum, 'token' => $token]);
+        $line2 = $stmt->fetch();
             
-        if ($line) {
-            // トークンの重複確認
-            $sql2 = <<<SQL
+        if ($line2) {
+            // error: トークンが重複
+            $resBody = <<<JSON
+            {
+                "status": "TOKEN_CONFLICTED",
+                "proc_no": {$line2['proc_no']}
+            }
+            JSON;
+            http_response_code(409);
+
+        } else {
+            // 加工機に紐づくトークンの存在確認
+            $sql = <<<SQL
                 SELECT
-                    proc_no
+                    proc_no,
+                    token
                 FROM
                     t_proc_no_token as pt
                 WHERE
-                    token = :token
-                    AND
-                    NOT proc_no = :proc_no
+                    proc_no = :proc_no
+                FOR UPDATE;
                 SQL;
                 
-            $stmt = $pdo->prepare($sql2);
-            $stmt->execute(['proc_no' => $procNum, 'token' => $token]);
-            $line2 = $stmt->fetch();
-            
-            if ($line2) {
-                // error: トークンが重複
-                $resBody = <<<JSON
-                {
-                    "status": "TOKEN_CONFLICTED",
-                    "proc_no": {$line2['proc_no']}
-                }
-                JSON;
-                http_response_code(409);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(['proc_no' => $procNum]);
+            $line = $stmt->fetch();
 
-            }
-            else if ($line['token'] !== $oldToken && !$force) {
-                // error: サーバー側のトークン情報と一致しない
-                $resBody = <<<JSON
-                {
-                    "status": "CURRENT_TOKEN_NOT_MATCHED"
+            if ($line) {
+                if ($line['token'] !== $oldToken && !$force) {
+                    // error: サーバー側のトークン情報と一致しない
+                    $resBody = <<<JSON
+                    {
+                        "status": "CURRENT_TOKEN_NOT_MATCHED"
+                    }
+                    JSON;
+                    http_response_code(400);
                 }
-                JSON;
-                http_response_code(400);
-            
             } else {
-                // 更新可能
-            }
-
-        } else {
-            // 初回の対応付け
-            $firstTime = true;
-
-            if (!$force) {
-                $resBody = <<<JSON
-                {
-                    "status": "NO_CONTENT"
+                // 初回の対応付け
+                $firstTime = true;
+    
+                if (!$force) {
+                    $resBody = <<<JSON
+                    {
+                        "status": "NO_CONTENT"
+                    }
+                    JSON;
+                    http_response_code(200);
                 }
-                JSON;
-                http_response_code(200);
             }
         }
 
@@ -127,12 +125,12 @@ if (array_key_exists('proc-num', $_POST)
                         update_date
                     )
                     VALUES
-                    {
+                    (
                         :proc_no,
                         :token,
                         NOW(),
                         NOW()
-                    };
+                    );
                     SQL;
 
                 $stmt = $pdo->prepare($insertSql);
