@@ -6,7 +6,7 @@
     },
     "OLC":
     {
-        "dsn": "mysql:host=localhost;dbname=ol_kokyaku;port=3306",
+        "dsn": "mysql:host=172.17.0.1;dbname=ol_kokyaku;port=3306",
         "username": "remote_user",
         "password": "UGABDc5ktVPmVszjXsEDGfre3Jwk5RUd"
     }

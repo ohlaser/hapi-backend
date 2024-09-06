@@ -10,8 +10,8 @@ require_once($backendDir.'/scripts/ApiVerifier.php');
 require_once('log.php');
 
  
-$verifier = new ApiVerifier();
-$verifier->verify(true);
+$verifier = new ApiVerifier(true);
+$verifier->verify();
 
 
 http_response_code(400);
@@ -45,13 +45,14 @@ if (array_key_exists('proc-num', $_POST)
 
         // 加工機に紐づくトークンの存在確認
         $sql = <<<SQL
-            SELECT FOR UPDATE
+            SELECT
                 proc_no,
                 token
             FROM
                 t_proc_no_token as pt
             WHERE
                 proc_no = :proc_no
+            FOR UPDATE;
             SQL;
             
         $stmt = $pdo->prepare($sql);
@@ -109,7 +110,7 @@ if (array_key_exists('proc-num', $_POST)
                     "status": "NO_CONTENT"
                 }
                 JSON;
-                http_response_code(204);
+                http_response_code(200);
             }
         }
 
@@ -171,6 +172,8 @@ if (array_key_exists('proc-num', $_POST)
         }
         writeLog($e, basename(__FILE__), (int)$procNum);
     }
+
+    echo $resBody;
 }
 
 ?>

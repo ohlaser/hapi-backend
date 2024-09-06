@@ -8,7 +8,7 @@ function writeLog($logString, $fileName, $processorId) {
 
     $logString .= "\n";
 
-    $fp = fopen($backendDir.'/log/'.$fileName.'.log', 'a');
+    $fp = fopen($backendDir.'/log/api/'.$fileName.'.log', 'a');
     flock($fp, LOCK_EX);
 
     fwrite($fp, date("Y-m-d H:i:s"). ' proc_no: '. $processorId . ', message: ' . $logString);

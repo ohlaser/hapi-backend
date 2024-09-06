@@ -10,8 +10,8 @@
  require_once('log.php');
 
  
- $verifier = new ApiVerifier();
- $verifier->verify(true);
+ $verifier = new ApiVerifier(true);
+ $verifier->verify();
 
 
  http_response_code(400);
@@ -38,20 +38,21 @@ if (array_key_exists('proc-num', $_POST)
 
         // 加工機に紐づくトークンの存在確認
         $sql = <<<SQL
-            SELECT FOR UPDATE
-                count(1)
+            SELECT
+                count(1) as count
             FROM
                 t_proc_no_token as pt
             WHERE
                 proc_no = :proc_no
                 AND
                 token = :token
+            FOR UPDATE;
             SQL;
             
         $stmt = $pdo->prepare($sql);
         $stmt->execute(['proc_no' => $procNum, 'token' => $token]);
 
-        if ($stmt->fetch()) {
+        if ($stmt->fetch()['count'] != 0) {
             http_response_code(200);
 
         } else {
