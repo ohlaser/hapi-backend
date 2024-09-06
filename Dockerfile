@@ -18,6 +18,7 @@ RUN apt update && apt install -y \
 
 # PHPの設定を有効化
 RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") && a2enmod php$PHP_VERSION
+RUN a2enmod rewrite
 
 # gitリポジトリを展開
 RUN rm -r /var/www
