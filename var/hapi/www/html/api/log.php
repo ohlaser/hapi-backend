@@ -7,8 +7,13 @@ function writeLog($logString, $fileName, $processorId) {
     global $backendDir;
 
     $logString .= "\n";
+    $apiLogDir = $backendDir.'/log/api/';
 
-    $fp = fopen($backendDir.'/log/api/'.$fileName.'.log', 'a');
+    if (!is_dir($apiLogDir)) {
+        mkdir($apiLogDir, 0777, true);
+    }
+
+    $fp = fopen($apiLogDir.$fileName.'.log', 'a');
     flock($fp, LOCK_EX);
 
     fwrite($fp, date("Y-m-d H:i:s"). ' proc_no: '. $processorId . ', message: ' . $logString);

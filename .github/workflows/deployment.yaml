@@ -1,0 +1,30 @@
+name: CI Workflow
+on: 
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # リポジトリをチェックアウト
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      # SSHキーの設定
+      - name: setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOYED_SERVER_SSH_PRIVATE_KEY }}
+
+      # リモートサーバーへファイルを転送
+      - name:  deploy files to remote server
+        run: |
+          rsync -avz --delete \
+          -e "ssh -p 11022 -o StrictHostKeyChecking=no" \
+          ./var/hapi/* $SSH_USER@$SSH_HOST:/var/hapi
+        env:
+          SSH_USER: ${{ secrets.DEPLOYED_SERVER_SSH_USER }}
+          SSH_HOST: ${{ secrets.DEPLOYED_SERVER_ADDRESS }}
+
