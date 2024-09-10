@@ -10,8 +10,8 @@ require_once($backendDir.'/scripts/ApiVerifier.php');
 require_once('log.php');
 
  
-$verifier = new ApiVerifier(true);
-$verifier->verify();
+$verifier = new ApiVerifier(null, null, true);
+$verifier->verifyForManagementProcess();
 
 
 http_response_code(400);

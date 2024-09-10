@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * 認証処理を行うクラス
+ */
 class ApiVerifier
 {
     private const SALT = '$6$sdkdjbksjbsaJs';
@@ -40,19 +43,14 @@ class ApiVerifier
             $olcdb['options']);
     }
     
+    /**
+     * 認証処理 標準
+     */
     public function verify()
     {
         $result = false;
 
-        $headers = apache_request_headers();
-        $token = null;
-        if (array_key_exists("Authorization", $headers))
-        {
-            preg_match('/Bearer\s(\S+)/', $headers["Authorization"], $matches);
-            $token = $matches[1];
-        }
-        $auth = self::SALT.'$'. ($this->isAdmin ? self::AUTH_ADMIN : self::AUTH);
-        if (crypt($token, self::SALT) == $auth)
+        if ($this->verifySharedToken())
         {
             $result = $this->procToken
                 ? verifyWithProcessorToken()
@@ -119,6 +117,35 @@ class ApiVerifier
 
         return $result;
     }
+
+    /**
+     * 管理者用の処理を行う際の認証処理
+     */
+    public function verifyForManagementProcess()
+    {
+        return $this->isAdmin && $this->verifySharedToken();
+    }
+
+    /**
+     * 共有トークンの認証処理
+     */
+    private function verifySharedToken()
+    {
+        $result = false;
+
+        $headers = apache_request_headers();
+        $token = null;
+        if (array_key_exists("Authorization", $headers))
+        {
+            preg_match('/Bearer\s(\S+)/', $headers["Authorization"], $matches);
+            $token = $matches[1];
+        }
+        $auth = self::SALT.'$'. ($this->isAdmin ? self::AUTH_ADMIN : self::AUTH);
+        $result = crypt($token, self::SALT) == $auth;
+        
+        return $result;
+    }
+
 }
 
 ?>

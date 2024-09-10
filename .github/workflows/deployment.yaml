@@ -2,7 +2,7 @@ name: CI Workflow
 on: 
   push:
     branches:
-      - main
+      - deploy
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,7 +21,7 @@ jobs:
       # リモートサーバーへファイルを転送
       - name:  deploy files to remote server
         run: |
-          rsync -avz --delete \
+          rsync -avz --delete --exclude='log/' \
           -e "ssh -p 11022 -o StrictHostKeyChecking=no" \
           ./var/hapi/* $SSH_USER@$SSH_HOST:/var/hapi
         env:

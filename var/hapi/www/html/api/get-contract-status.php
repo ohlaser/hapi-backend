@@ -9,8 +9,6 @@ require_once('vendor/autoload.php');
 require_once('log.php');
 
 
-$verifier = new ApiVerifier();
-$verifier->verify();
 
 http_response_code(400);
 
@@ -18,8 +16,12 @@ if (array_key_exists('proc-num', $_GET))
 {   
     $result = null;
     $procNum = $_GET['proc-num'];
+    $procToken = $_GET['proc-token'];
 
     try{
+        $verifier = new ApiVerifier((int)$procNum, $procToken);
+        $verifier->verify();
+
         $json =file_get_contents($backendDir.'/data/access_keys.json');
         $keys = json_decode($json, true);
 

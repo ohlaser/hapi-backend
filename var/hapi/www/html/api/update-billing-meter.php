@@ -9,9 +9,6 @@ require_once('vendor/autoload.php');
 require_once('log.php');
 
 
-// アクセスの妥当性を確認
-$verifier = new ApiVerifier();
-$verifier->verify();
 
 
 // stripe apiを使用
@@ -30,8 +27,11 @@ if (array_key_exists('meter-type', $_POST)
     $meterType = $_POST['meter-type'];
     $meteredValue = $_POST['metered-value'];
     $procNum = $_POST['proc-num'];
+    $procToken = $_POST['proc-token'];
 
     try {
+        $verifier = new ApiVerifier($procNum, $procToken);
+        $verifier->verify();
 
         if ($meterType === 'processing-time') {
             $success = updateBilledProcessingTime((int)$meteredValue, (int)$procNum);

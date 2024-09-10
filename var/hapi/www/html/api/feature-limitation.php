@@ -9,17 +9,19 @@ require_once('log.php');
 
 
 
-$verifier = new ApiVerifier();
-$verifier->verify();
-
 http_response_code(400);
 
 if (array_key_exists("membership-type", $_POST))
 {
     $result = "";
     $type = $_POST["membership-type"];
+    $procNum = $_POST["proc-num"];
+    $procToken = $_POST["proc-token"];
 
     try {
+        $verifier = new ApiVerifier((int)$procNum, $procToken);
+        $verifier->verify();
+
         if ($type === "paid")
         {
             $result = file_get_contents($backendDir."/data/FeatureLimitationPaid.json");

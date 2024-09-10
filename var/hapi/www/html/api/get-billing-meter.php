@@ -9,9 +9,6 @@ require_once('vendor/autoload.php');
 require_once('log.php');
 
 
-// アクセスの妥当性を確認
-$verifier = new ApiVerifier();
-$verifier->verify();
 
 
 // default status
@@ -23,8 +20,12 @@ if (array_key_exists('meter-type', $_GET)
     $result = null;
     $meterType = $_GET['meter-type'];
     $procNum = $_GET['proc-num'];
+    $procToken = $_GET['proc-token'];
 
     try {
+        $verifier = new ApiVerifier((int)$procNum, $procToken);
+        $verifier->verify();
+
         if ($meterType === 'processing-time') {
             $ret = getBilledProcessingTime((int)$procNum);
                     
