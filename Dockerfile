@@ -1,6 +1,7 @@
 FROM ubuntu/apache2
 
 RUN apt update && apt install -y \
+    rsync \
     php \
     libapache2-mod-php \
     && apt clean \
@@ -21,8 +22,14 @@ RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") && a2e
 RUN a2enmod rewrite
 
 # gitリポジトリを展開
-RUN rm -r /var/www
-COPY var/ /var/
+RUN mkdir /var/hapi
+COPY var/ /var/hapi
+
+# 設定ファイルをコピーして適用 
+COPY apache2.conf /etc/apache2/apache2.conf
+COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
+# TODO: restartでないと反映されない？
+RUN service apache2 reload
 
 # Apache2 の起動スクリプト
 CMD ["apachectl", "-D", "FOREGROUND"]
