@@ -18,12 +18,25 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.DEPLOYED_SERVER_SSH_PRIVATE_KEY }}
 
+      # PHPのセットアップ
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Install dependencies with Composer
+        run: composer install --no-dev --prefer-dist --no-progress --no-suggest --optimize-autoloader
+
       # リモートサーバーへファイルを転送
       - name:  deploy files to remote server
         run: |
           rsync -avz --delete --exclude='log/' \
           -e "ssh -p 11022 -o StrictHostKeyChecking=no" \
           ./var/hapi/* $SSH_USER@$SSH_HOST:/var/hapi
+          
+          rsync -avz --delete -e "ssh -p 11022 -o StrictHostKeyChecking=no" \
+          ./vendor/* $SSH_USER@$SSH_HOST:/var/hapi/www/html/api/vendor/
         env:
           SSH_USER: ${{ secrets.DEPLOYED_SERVER_SSH_USER }}
           SSH_HOST: ${{ secrets.DEPLOYED_SERVER_ADDRESS }}
