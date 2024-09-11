@@ -5,6 +5,7 @@
 $backendDir = dirname(__FILE__, 4);
 
 require_once($backendDir.'/scripts/ApiVerifier.php');
+require_once($backendDir.'/scripts/OlcApi.php');
 require_once($backendDir.'/scripts/getBilledProcessingTime.php');
 require_once('vendor/autoload.php');
 require_once('log.php');
@@ -82,7 +83,7 @@ class ProcessorInfoGetter
 
         if ($olcJson) {
             // 顧客種別
-            checkMembership($olcJson);
+            $this->checkMembership($olcJson);
     
             // 機能制限
             $featureJson = $this->getFeatureLimitationAsJson();
@@ -99,12 +100,12 @@ class ProcessorInfoGetter
             // 各種データを統合して1つのJSONとして返送
             $result = <<<JSON
             {
-                "membership": {$this->membership->value},
+                "membership": "{$this->membership->value}",
                 "olc_data": {$olcJson},
                 "feature_limitation": {$featureJson},
                 "auto_update": {$isAutoUpdateStr},
                 "billalbe_processing_time": {$billingJson},
-                "non_billable_dration": {$nonBillableDuration},
+                "non_billable_dration": {$nonBillableDuration}
             }
             JSON;
             http_response_code(200);
@@ -130,7 +131,7 @@ class ProcessorInfoGetter
 
         $pickedToken = null;
         $longestLifeTime = 0;
-        foreach ($olcApi->GetTokens(true, true) as $token)
+        foreach ($olcApi->GetTokens(true, true)->tokens as $token)
         {
             $endOfExpiry = strtotime($token->end);
             if ($endOfExpiry > $longestLifeTime)
@@ -151,7 +152,7 @@ class ProcessorInfoGetter
         $opts = array(
             'http' => array(
                 'method'  => 'GET',
-                'header' => "Authorization: Bearer $token\r\n"
+                'header' => "Authorization: Bearer $pickedToken\r\n"
             )
         );
         $context = stream_context_create($opts);

@@ -31,5 +31,8 @@ COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 # TODO: restartでないと反映されない？
 RUN service apache2 reload
 
+# TODO: ファイルシステム権限関係
+# ...
+
 # Apache2 の起動スクリプト
 CMD ["apachectl", "-D", "FOREGROUND"]

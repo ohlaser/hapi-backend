@@ -30,17 +30,23 @@ class ApiVerifier
     
     function __construct($procNum, $procToken, $isAdmin = false)
     {
-        global $olcdb;
+        $backendDir = dirname(__FILE__, 2);
 
         $this->procNum = $procNum;
         $this->procToken = $procToken;
         $this->isAdmin = $isAdmin;
         
+        $json =file_get_contents($backendDir.'/data/access_keys.json');
+        $keys = json_decode($json, true);
         $this->pdo = new PDO(
-            $olcdb['dsn'], 
-            $olcdb['username'], 
-            $olcdb['password'], 
-            $olcdb['options']);
+            $keys['OLC']['dsn'], 
+            $keys['OLC']['username'], 
+            $keys['OLC']['password'], 
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
     }
     
     /**
@@ -53,8 +59,8 @@ class ApiVerifier
         if ($this->verifySharedToken())
         {
             $result = $this->procToken
-                ? verifyWithProcessorToken()
-                : verifyWithoutProcessorToken();
+                ? $this->verifyWithProcessorToken()
+                : $this->verifyWithoutProcessorToken();
         }
         
         if (!$result) {
@@ -77,7 +83,8 @@ class ApiVerifier
             FROM
                 t_proc_no_token
             WHERE
-                proc_no = :proc_no;
+                proc_no = :proc_no
+                AND
                 token = :token
             SQL;
 
