@@ -184,10 +184,10 @@ class ProcessorInfoGetter
                     $this->membership = Membership::Paid;
                     break;
     
-                case 'USED-SUBS-ST';
+                case 'SP-SUB-ST';
                     $this->membership = Membership::SubscriptionA;
                     break;
-                case 'USED-SUBS-LT';
+                case 'SP-SUB-LT';
                     $this->membership = Membership::SubscriptionB;
                     break;
 

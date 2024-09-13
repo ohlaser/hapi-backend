@@ -145,7 +145,7 @@ class ApiVerifier
         if (array_key_exists("Authorization", $headers))
         {
             preg_match('/Bearer\s(\S+)/', $headers["Authorization"], $matches);
-            $token = $matches[1];
+            $token = (count($matches) >= 2) ? $matches[1] : "";
         }
         $auth = self::SALT.'$'. ($this->isAdmin ? self::AUTH_ADMIN : self::AUTH);
         $result = crypt($token, self::SALT) == $auth;
