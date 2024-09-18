@@ -57,9 +57,7 @@ class ApiVerifier
 
         if ($this->verifySharedToken())
         {
-            $result = $this->procToken
-                ? $this->verifyWithProcessorToken()
-                : $this->verifyWithoutProcessorToken();
+            $result = $this->verifyWithProcessorToken() ?: $this->verifyWithoutProcessorToken();
         }
         
         if (!$result) {
@@ -73,6 +71,9 @@ class ApiVerifier
      */
     private function verifyWithProcessorToken()
     {
+        if (!$this->procToken)
+            return false;
+
         $result = false;
         
         // 加工機番号とトークンのマッピングを検証する
@@ -129,7 +130,11 @@ class ApiVerifier
      */
     public function verifyForManagementProcess()
     {
-        return $this->isAdmin && $this->verifySharedToken();
+        $result = $this->isAdmin && $this->verifySharedToken();
+        if (!$result) {
+            http_response_code(401);
+            exit();
+        }
     }
 
     /**

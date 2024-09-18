@@ -18,5 +18,22 @@ enable() {
 
 # disable test mode
 disable() {
-    echo "" > $modepath
+    > $modepath
 }
+
+
+case "$1" in
+    status)
+        status
+        ;;
+    enable)
+        enable
+        ;;
+    disable)
+        disable
+        ;;
+    *)
+        echo "Usage: $0 {status|enable|disable}"
+        exit 1
+        ;;
+esac
