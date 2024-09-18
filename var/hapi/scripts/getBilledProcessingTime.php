@@ -1,13 +1,15 @@
 <?php
 
+$backendDir = dirname(__FILE__, 2);
+require_once($backendDir.'/scripts/Resources.php');
+
 
 /**
  * 従量課金対象の加工時間の取得
  */
 function getBilledProcessingTime($procNum) 
 {
-    $backendDir = dirname(__FILE__, 2);
-
+    global $backendDir;
     $result = null;
     
     $json =file_get_contents($backendDir.'/data/access_keys.json');
@@ -33,7 +35,7 @@ function getBilledProcessingTime($procNum)
     $invoices = $stripe->invoices->upcoming(['customer' => $customerId]);
 
     foreach ($invoices->lines->data as $invoice) {
-        if ($invoice->price->id !== 'price_1PiSqcDSRUXumGeOmvBdofAI') // note: 価格変更が行われた場合はprice_idを追加
+        if ($invoice->price->id !== Resources::$procTimeMeterPriceId) // note: 価格変更が行われた場合はprice_idを追加
             continue;
 
         $result['Amount'] = $invoice['amount'];

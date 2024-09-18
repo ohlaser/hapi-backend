@@ -5,6 +5,7 @@
 $backendDir = dirname(__FILE__, 4);
 
 require_once($backendDir.'/scripts/ApiVerifier.php');
+require_once($backendDir.'/scripts/Resources.php');
 require_once('vendor/autoload.php');
 require_once('log.php');
 
@@ -83,7 +84,7 @@ function updateBilledProcessingTime($procTime, $procNum)
 
     // 暫定で従量制固定
     $stripe->billing->meterEvents->create([
-        'event_name' => 'processing_time',
+        'event_name' => Resources::$procTimeMeterName,
         'payload' => [
             'value' => $procTime,
             'stripe_customer_id' => $customerId,

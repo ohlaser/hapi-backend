@@ -35,6 +35,16 @@ class Resources
      * Stripe API バージョン
      */
     public static $stripeApiVersion;
+
+    /**
+     * stripe 加工時間メーター名
+     */
+    public static $procTimeMeterName;
+
+    /**
+     * stripe 加工時間メーター 価格ID
+     */
+    public static $procTimeMeterPriceId;
     
     /**
      * KOMOJU
@@ -74,6 +84,8 @@ class Resources
             ],
         ];
 
+        self::$procTimeMeterName = 'processing_time';
+
         // テストモードか否かで変化するリソースの初期化
         // 本番環境では基本触らないのでロック無し
         if (file_get_contents('../data/testmode')) { 
@@ -91,9 +103,10 @@ class Resources
         
         self::$isTest = true;
 
-        // secret API key.
+        // stripe settings
         self::$stripeSecretKey = 'sk_test_51ODMxoDSRUXumGeOSAzEYSkfvkh3Fsx8fMChXJM3SvI90PFTzGR6q2Orh82dsH8FCEFn1GsoUSRdYCcp2lhu85Ek00lFzmiyjN';
         self::$stripePublicKey = 'pk_test_51ODMxoDSRUXumGeO6qFkTa5Y89XgjBavnLGWmXYMJjpQrftQRl9shm6VnluSbqK1Ifi4s9s022IcKnVlCSS1lG7D00cmAsjPac';
+        self::$procTimeMeterPriceId = 'price_1PiSqcDSRUXumGeOmvBdofAI';
 
         // KOMOJU
         self::$komojuSecretKey = 'sk_test_8iurno66j8vhcghv1ee6twvy';
@@ -107,9 +120,10 @@ class Resources
 
         self::$isTest = false;
 
-        // stripe API key
+        // stripe settings
         self::$stripeSecretKey = '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';
         self::$stripePublicKey = 'pk_live_51ODMxoDSRUXumGeOIXxdo8sygYIyz8W2coN8jr6gc9ZHlCC5W0rMmUs6zmC47ROuGV4hxSnM6wbcGv26GLheWY5n00MJ9Els5V';
+        self::$procTimeMeterPriceId = 'price_12345iSqcDSRUXumGeOmvBdofAI'; // TODO: 本番用に変更
 
         // KOMOJU
         self::$komojuSecretKey = 'sk_live_2o6am2nt194gtmidmznvs7bj';
