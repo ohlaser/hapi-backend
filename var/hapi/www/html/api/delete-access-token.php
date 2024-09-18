@@ -7,6 +7,7 @@
  $backendDir = dirname(__FILE__, 4);
 
 require_once($backendDir.'/scripts/ApiVerifier.php');
+require_once($backendDir.'/scripts/Resources.php');
 require_once('log.php');
 
  
@@ -21,13 +22,11 @@ if (array_key_exists('proc-num', $_POST))
     $procNum = $_POST['proc-num'];
 
     try {
-        $json =file_get_contents($backendDir.'/data/access_keys.json');
-        $keys = json_decode($json, true);
-
+        $olcdb = Resources::$olcdb;
         $pdo = new PDO(
-            $keys['OLC']['dsn'], 
-            $keys['OLC']['username'], 
-            $keys['OLC']['password'], 
+            $olcdb['dsn'], 
+            $olcdb['username'], 
+            $olcdb['password'], 
             [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

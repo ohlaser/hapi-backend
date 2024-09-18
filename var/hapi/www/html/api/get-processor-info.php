@@ -5,6 +5,7 @@
 $backendDir = dirname(__FILE__, 4);
 
 require_once($backendDir.'/scripts/ApiVerifier.php');
+require_once($backendDir.'/scripts/Resources.php');
 require_once($backendDir.'/scripts/OlcApi.php');
 require_once($backendDir.'/scripts/getBilledProcessingTime.php');
 require_once('vendor/autoload.php');
@@ -241,12 +242,9 @@ class ProcessorInfoGetter
     {
         global $backendDir;
 
-        $json =file_get_contents($backendDir.'/data/access_keys.json');
-        $keys = json_decode($json, true);
-
         $stripe = new \Stripe\StripeClient([
-            'api_key' => $keys['stripe']['secret_key'],
-            'stripe_version' => $keys['stripe']['api_version']]);
+            'api_key' => Resources::$stripeSecretKey,
+            'stripe_version' => Resources::$stripeApiVersion]);
             
         $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $this->procNum . '"']);
 

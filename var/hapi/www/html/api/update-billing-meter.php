@@ -66,13 +66,10 @@ function updateBilledProcessingTime($procTime, $procNum)
     global $backendDir;
     $success = false;
     
-    $json =file_get_contents($backendDir.'/data/access_keys.json');
-    $keys = json_decode($json, true);
-    
     // stripe初期化
     $stripe = new \Stripe\StripeClient([
-        'api_key' => $keys['stripe']['secret_key'],
-        'stripe_version' => $keys['stripe']['api_version']]);
+        'api_key' => Resources::$stripeSecretKey,
+        'stripe_version' => Resources::$stripeApiVersion]);
 
     // 初回サーチ後は番号とサブスクidの紐づけをolcサーバーに保存してもよいのでは？
     // オーバーヘッドも減る

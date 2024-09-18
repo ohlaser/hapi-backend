@@ -12,13 +12,10 @@ function getBilledProcessingTime($procNum)
     global $backendDir;
     $result = null;
     
-    $json =file_get_contents($backendDir.'/data/access_keys.json');
-    $keys = json_decode($json, true);
-    
     // stripe初期化
     $stripe = new \Stripe\StripeClient([
-        'api_key' => $keys['stripe']['secret_key'],
-        'stripe_version' => $keys['stripe']['api_version']]);
+        'api_key' => Resources::$stripeSecretKey,
+        'stripe_version' => Resources::$stripeApiVersion]);
 
     $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '"']);
     if (count($subs->data) === 0)
