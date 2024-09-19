@@ -253,7 +253,6 @@ class ProcessorInfoGetter
 
     /**
      * 従量データの取得
-     * TODO: 既存のファイルを参照する形に変更
      */
     private function getBillableProcessingDataAsJson()
     {

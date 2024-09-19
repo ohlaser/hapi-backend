@@ -123,7 +123,7 @@ class Resources
         // stripe settings
         self::$stripeSecretKey = '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';
         self::$stripePublicKey = 'pk_live_51ODMxoDSRUXumGeOIXxdo8sygYIyz8W2coN8jr6gc9ZHlCC5W0rMmUs6zmC47ROuGV4hxSnM6wbcGv26GLheWY5n00MJ9Els5V';
-        self::$procTimeMeterPriceId = 'price_12345iSqcDSRUXumGeOmvBdofAI'; // TODO: 本番用に変更
+        self::$procTimeMeterPriceId = 'price_1Q0cpzDSRUXumGeOsEzEKP0v';
 
         // KOMOJU
         self::$komojuSecretKey = 'sk_live_2o6am2nt194gtmidmznvs7bj';
