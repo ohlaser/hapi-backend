@@ -276,6 +276,7 @@ class ProcessorInfoGetter
 
 
 // エントリーポイント
+Resources::init();
 http_response_code(400);
 
 if (array_key_exists('proc-num', $_POST)

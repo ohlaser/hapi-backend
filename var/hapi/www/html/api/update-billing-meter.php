@@ -18,6 +18,7 @@ require_once('log.php');
 
 
 // default status
+Resources::init();
 http_response_code(400);
 
 if (array_key_exists('meter-type', $_POST)

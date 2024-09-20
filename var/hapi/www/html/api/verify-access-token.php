@@ -11,6 +11,7 @@
  require_once('log.php');
 
  
+ Resources::init();
  $verifier = new ApiVerifier(null, null, true);
  $verifier->verifyForManagementProcess();
 

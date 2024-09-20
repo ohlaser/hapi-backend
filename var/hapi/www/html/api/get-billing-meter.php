@@ -10,6 +10,7 @@ require_once('vendor/autoload.php');
 require_once('log.php');
 
 
+Resources::init();
 
 
 // default status
