@@ -17,7 +17,7 @@ function getBilledProcessingTime($procNum)
         'api_key' => Resources::$stripeSecretKey,
         'stripe_version' => Resources::$stripeApiVersion]);
 
-    $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '"']);
+    $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . strval($procNum) . '"']);
     if (count($subs->data) === 0)
         throw new Exception('invalid processor number');
     

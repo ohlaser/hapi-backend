@@ -259,7 +259,7 @@ class ProcessorInfoGetter
         if ($this->membership != Membership::SubscriptionB)
             return 'null';
 
-        $result = getBilledProcessingTime((int)$this->procNum);
+        $result = getBilledProcessingTime($this->procNum);
     
         return json_encode($result);
     }
