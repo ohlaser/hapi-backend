@@ -88,7 +88,7 @@ class Resources
 
         // テストモードか否かで変化するリソースの初期化
         // 本番環境では基本触らないのでロック無し
-        if (file_get_contents('../data/testmode')) { 
+        if (substr(file_get_contents(dirname(__FILE__).'/../data/testmode'), 0, 1) === '1') { 
             self::initAsTestMode();
         } else {
             self::initAsLiveMode();

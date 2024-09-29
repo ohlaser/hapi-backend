@@ -193,17 +193,16 @@ class ProcessorInfoGetter
                     break;
 
                 default:
-                    if ($this->contractType == 'sell') {
-                        $this->membership = Membership::Free;
-                    } else if ($this->contractType == 'subscription') {
-                        $this->membership = Membership::InActive;
-                    } else {
-                        throw new Exception('unexpected error');
-                    }
-                    break;
+                    throw new Exception('unexpected error: invalid prod_cd '.$olcData->prod_cd);
             }
         } else {
-            throw new Exception('unexpected error');
+            if ($this->contractType == 'sell') {
+                $this->membership = Membership::Free;
+            } else if ($this->contractType == 'subscription') {
+                $this->membership = Membership::InActive;
+            } else {
+                throw new Exception('unexpected error: invalid contract type '.$this->contractType);
+            }
         }
     }
 
