@@ -74,7 +74,7 @@ function updateBilledProcessingTime($procTime, $procNum)
 
     // 初回サーチ後は番号とサブスクidの紐づけをolcサーバーに保存してもよいのでは？
     // オーバーヘッドも減る
-    $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '"']);
+    $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '" AND status:"active"']);
     if (count($subs->data) === 0)
         throw new Exception('invalid processor number');
 

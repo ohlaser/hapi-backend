@@ -64,7 +64,7 @@ class ProcessorInfoGetter
     /**
      * Stripeサブスクリプションリソース
      */
-    private $subs;
+    private $subscription;
 
     /**
      * コンストラクタ
@@ -75,6 +75,7 @@ class ProcessorInfoGetter
         $this->procToken = $procToken;
         $this->contractType = $contractType;
         $this->membership = Membership::InActive;
+        $this->subscription = null;
         
         $this->stripe = new \Stripe\StripeClient([
             'api_key' => Resources::$stripeSecretKey,
@@ -135,10 +136,16 @@ class ProcessorInfoGetter
      */
     private function getStripeSubsciption()
     {
-        if (!$this->subs) {
-            $this->subs = $this->stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $this->procNum . '"']);
+        if ($this->subscription == null) 
+        {
+            $this->subscription = false;
+            $subs = $this->stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $this->procNum . '" AND status:"active"']);
+
+            if (count($subs->data)) {
+                $this->subscription = $subs->data[0];
+            }
         }
-        return $this->subs;
+        return $this->subscription;
     }
 
     /**
@@ -186,17 +193,27 @@ class ProcessorInfoGetter
     }
 
     /**
-     * 保守についてStripeデータと連携している場合は保守情報をStripeのものに上書き
+     * 保守についてStripeデータと連携していて且つStripeの(実質的な)契約開始日を迎えている場合は保守情報をStripeのものに上書き
      * OLC側の反映が遅れている可能性があるため
+     * サブスクリプションに紐づく請求書を取得 1円以上の支払いデータの有無で有効性の判断とする
      */
     private function overrideMaintDataIfRequired($olcJson)
     {
         $olcData = json_decode($olcJson);
+
+        $invoices = [];
         $subs = $this->getStripeSubsciption();
-        
-        if (count($subs->data)) {
-            $olcData->prod_cd = $subs->data->metadata->prod_cd;
+
+        if ($subs) {
+            $invoices = $stripe->invoice::all(['subscription' => $subs->id]);
         }
+        foreach ($invoices->data as $invoice) {
+            if ($invoice->amount_paid > 0) {
+                $olcData->prod_cd = $subs->items->data[0]->price->metadata->prod_cd;
+                break;
+            }
+        }
+
         return json_encode($olcData);   // 無編集項目について元のデータと同一の結果になることを確認する
     }
 
@@ -276,11 +293,7 @@ class ProcessorInfoGetter
      */
     private function isAutoExtensionAsJson()
     {
-        global $backendDir;
-            
-        $subs = $this->getStripeSubsciption();
-
-        return count($subs->data) ? 'true' : 'false';
+        return $this->getStripeSubsciption() ? 'true' : 'false';
     }
 
     /**
