@@ -195,7 +195,6 @@ class ProcessorInfoGetter
     /**
      * 保守についてStripeデータと連携していて且つStripeの(実質的な)契約開始日を迎えている場合は保守情報をStripeのものに上書き
      * OLC側の反映が遅れている可能性があるため
-     * サブスクリプションに紐づく請求書を取得 1円以上の支払いデータの有無で有効性の判断とする
      */
     private function overrideMaintDataIfRequired($olcJson)
     {
@@ -204,14 +203,11 @@ class ProcessorInfoGetter
         $invoices = [];
         $subs = $this->getStripeSubsciption();
 
-        if ($subs) {
-            $invoices = $stripe->invoice::all(['subscription' => $subs->id]);
-        }
-        foreach ($invoices->data as $invoice) {
-            if ($invoice->amount_paid > 0) {
-                $olcData->prod_cd = $subs->items->data[0]->price->metadata->prod_cd;
-                break;
-            }
+        // 契約時刻と現サイクル開始時刻一致しない場合は2回目以降のサイクル(有償)と判断
+        // Stripe側のサイクル更新遅延を考慮して、現サイクル終了時刻を超過している場合も真とする
+        if ($subs->created != $subs->current_period_start
+            || time() > $subs->current_period_end) {
+            $olcData->prod_cd = $subs->items->data[0]->price->metadata->prod_cd; 
         }
 
         return json_encode($olcData);   // 無編集項目について元のデータと同一の結果になることを確認する
