@@ -62,6 +62,11 @@ class ProcessorInfoGetter
     private Membership $membership;
 
     /**
+     * Stripeサブスクリプションリソース
+     */
+    private $subs;
+
+    /**
      * コンストラクタ
      */
     function __construct($procNum, $procToken, $contractType)
@@ -70,6 +75,10 @@ class ProcessorInfoGetter
         $this->procToken = $procToken;
         $this->contractType = $contractType;
         $this->membership = Membership::InActive;
+        
+        $this->stripe = new \Stripe\StripeClient([
+            'api_key' => Resources::$stripeSecretKey,
+            'stripe_version' => Resources::$stripeApiVersion]);
     }
 
     /**
@@ -83,12 +92,14 @@ class ProcessorInfoGetter
         $olcJson = $this->getOlcDataAsJson();
 
         if ($olcJson) {
+            $olcJson = $this->overrideMaintDataIfRequired($olcJson);
+
             // 顧客種別
             $this->checkMembership($olcJson);
     
             // 機能制限
             $featureJson = $this->getFeatureLimitationAsJson();
-    
+            
             // 自動更新の有無
             $isAutoUpdateStr = $this->isAutoExtensionAsJson();
     
@@ -117,6 +128,17 @@ class ProcessorInfoGetter
         }
 
         echo $result;
+    }
+
+    /**
+     * 加工機番号に紐づくStripeサブスクリソースの取得
+     */
+    private function getStripeSubsciption()
+    {
+        if (!$this->subs) {
+            $this->subs = $this->stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $this->procNum . '"']);
+        }
+        return $this->subs;
     }
 
     /**
@@ -161,6 +183,21 @@ class ProcessorInfoGetter
 
         // すでにJson
         return $result;
+    }
+
+    /**
+     * 保守についてStripeデータと連携している場合は保守情報をStripeのものに上書き
+     * OLC側の反映が遅れている可能性があるため
+     */
+    private function overrideMaintDataIfRequired($olcJson)
+    {
+        $olcData = json_decode($olcJson);
+        $subs = $this->getStripeSubsciption();
+        
+        if (count($subs->data)) {
+            $olcData->prod_cd = $subs->data->metadata->prod_cd;
+        }
+        return json_encode($olcData);   // 無編集項目について元のデータと同一の結果になることを確認する
     }
 
     /**
@@ -240,12 +277,8 @@ class ProcessorInfoGetter
     private function isAutoExtensionAsJson()
     {
         global $backendDir;
-
-        $stripe = new \Stripe\StripeClient([
-            'api_key' => Resources::$stripeSecretKey,
-            'stripe_version' => Resources::$stripeApiVersion]);
             
-        $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $this->procNum . '"']);
+        $subs = $this->getStripeSubsciption();
 
         return count($subs->data) ? 'true' : 'false';
     }
