@@ -8,10 +8,11 @@
 
 require_once($backendDir.'/scripts/ApiVerifier.php');
 require_once($backendDir.'/scripts/Resources.php');
+require_once('hapi.php');
 require_once('log.php');
 
  
-Resources::init();
+Hapi::init();
 $verifier = new ApiVerifier(null, null, true);
 $verifier->verifyForManagementProcess();
 

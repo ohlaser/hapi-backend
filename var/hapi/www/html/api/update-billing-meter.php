@@ -7,6 +7,7 @@ $backendDir = dirname(__FILE__, 4);
 require_once($backendDir.'/scripts/ApiVerifier.php');
 require_once($backendDir.'/scripts/Resources.php');
 require_once('vendor/autoload.php');
+require_once('hapi.php');
 require_once('log.php');
 
 
@@ -18,7 +19,7 @@ require_once('log.php');
 
 
 // default status
-Resources::init();
+Hapi::init();
 http_response_code(400);
 
 if (array_key_exists('meter-type', $_POST)

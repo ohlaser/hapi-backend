@@ -10,6 +10,7 @@ require_once($backendDir.'/scripts/OlcApi.php');
 require_once($backendDir.'/scripts/getBilledProcessingTime.php');
 require_once($backendDir.'/scripts/StripeController.php');
 require_once('vendor/autoload.php');
+require_once('hapi.php');
 require_once('log.php');
 
 
@@ -320,7 +321,7 @@ class ProcessorInfoGetter
 
 
 // エントリーポイント
-Resources::init();
+Hapi::init();
 http_response_code(400);
 
 if (array_key_exists('proc-num', $_POST)

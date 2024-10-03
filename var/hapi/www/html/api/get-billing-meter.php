@@ -7,10 +7,11 @@ $backendDir = dirname(__FILE__, 4);
 require_once($backendDir.'/scripts/ApiVerifier.php');
 require_once($backendDir.'/scripts/getBilledProcessingTime.php');
 require_once('vendor/autoload.php');
+require_once('hapi.php');
 require_once('log.php');
 
 
-Resources::init();
+Hapi::init();
 
 
 // default status
