@@ -8,6 +8,7 @@ require_once($backendDir.'/scripts/ApiVerifier.php');
 require_once($backendDir.'/scripts/Resources.php');
 require_once($backendDir.'/scripts/OlcApi.php');
 require_once($backendDir.'/scripts/getBilledProcessingTime.php');
+require_once($backendDir.'/scripts/StripeController.php');
 require_once('vendor/autoload.php');
 require_once('log.php');
 
@@ -139,7 +140,9 @@ class ProcessorInfoGetter
         if ($this->subscription == null) 
         {
             $this->subscription = false;
-            $subs = $this->stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $this->procNum . '" AND status:"active"']);
+            $subs = StripeController::executeWithRetry(
+                [$this->stripe->subscriptions, 'search'], 
+                ['query' => 'metadata["proc_no"]:"' . $this->procNum . '" AND status:"active"']);
 
             if (count($subs->data)) {
                 $this->subscription = $subs->data[0];

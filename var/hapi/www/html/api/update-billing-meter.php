@@ -74,20 +74,25 @@ function updateBilledProcessingTime($procTime, $procNum)
 
     // 初回サーチ後は番号とサブスクidの紐づけをolcサーバーに保存してもよいのでは？
     // オーバーヘッドも減る
-    $subs = $stripe->subscriptions->search(['query' => 'metadata["proc_no"]:"' . $procNum . '" AND status:"active"']);
-    if (count($subs->data) === 0)
+    $subs = StripeController::ExecuteWithRetry(
+        [$stripe->subscriptions, 'search'], 
+        ['query' => 'metadata["proc_no"]:"' . $procNum . '" AND status:"active"']);
+    
+        if (count($subs->data) === 0)
         throw new Exception('invalid processor number');
 
     $customerId = $subs->data[0]->customer;
 
     // 暫定で従量制固定
-    $stripe->billing->meterEvents->create([
-        'event_name' => Resources::$procTimeMeterName,
-        'payload' => [
-            'value' => $procTime,
-            'stripe_customer_id' => $customerId,
-        ]
-    ]);
+    StripeController::ExecuteWithRetry(
+        [$stripe->billing->meterEvents, 'create'], 
+        [
+            'event_name' => Resources::$procTimeMeterName,
+            'payload' => [
+                'value' => $procTime,
+                'stripe_customer_id' => $customerId,
+            ]
+        ]);
 
     $success = true;
 
