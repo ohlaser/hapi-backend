@@ -80,7 +80,7 @@ function updateBilledProcessingTime($procTime, $procNum)
         ['query' => 'metadata["proc_no"]:"' . $procNum . '" AND status:"active"']);
     
         if (count($subs->data) === 0)
-        throw new Exception('invalid processor number');
+            throw new Exception('invalid processor number');
 
     $customerId = $subs->data[0]->customer;
 

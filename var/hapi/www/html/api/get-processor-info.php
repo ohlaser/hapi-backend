@@ -209,9 +209,11 @@ class ProcessorInfoGetter
 
         // 契約時刻と現サイクル開始時刻一致しない場合は2回目以降のサイクル(有償)と判断
         // Stripe側のサイクル更新遅延を考慮して、現サイクル終了時刻を超過している場合も真とする
-        if ($subs->created != $subs->current_period_start
-            || time() > $subs->current_period_end) {
-            $olcData->prod_cd = $subs->items->data[0]->price->metadata->prod_cd; 
+        if ($subs) {
+            if ($subs->created != $subs->current_period_start
+                || time() > $subs->current_period_end) {
+                $olcData->prod_cd = $subs->items->data[0]->price->metadata->prod_cd; 
+            }
         }
 
         return json_encode($olcData);   // 無編集項目について元のデータと同一の結果になることを確認する
