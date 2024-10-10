@@ -7,7 +7,7 @@ RUN apt update && apt install -y \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 必要な拡張モジュールをインストール
+# 必要なPHP拡張モジュールをインストール
 RUN apt update && apt install -y \
     php-mysql \
     php-curl \
@@ -25,11 +25,26 @@ RUN a2enmod rewrite
 RUN mkdir /var/hapi
 COPY var/ /var/hapi
 
+# php composer の準備、実行
+RUN php -r \
+    "copy('https://getcomposer.org/installer', 'composer-setup.php'); \
+    if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { \
+        echo 'Installer verified'; \
+    } else { \
+        echo 'Installer corrupt'; \
+        unlink('composer-setup.php'); \
+    } \
+     echo PHP_EOL; \
+     "
+RUN php composer-setup.php
+RUN php -r "unlink('composer-setup.php');"
+
+RUN composer install --no-dev --prefer-dist --no-progress --no-suggest --optimize-autoloader
+COPY vendor/* /var/hapi/www/html/api/vendor/
+
 # 設定ファイルをコピーして適用 
 COPY apache2.conf /etc/apache2/apache2.conf
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
-# TODO: restartでないと反映されない？
-RUN service apache2 reload
 
 # TODO: ファイルシステム権限関係
 # ...
