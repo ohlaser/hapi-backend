@@ -28,16 +28,14 @@ services:
     volumes: 
       # So that Traefik can listen to the Docker events
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./data/traefik/acme.json:/letsencrypt/acme.json"
       - "./traefik/traefik.yml:/etc/traefik/traefik.yml"
+      - "./traefik/data/acme.json:/letsencrypt/acme.json"
     networks:
       - web
 
 # HAPIアプリケーション
   app:
-    build:
-      context: ./app
-      dockerfile: Dockerfile 
+    image: ohlaser/hapi-backend:${HAPI_APP_IMAGE_TAG}
     environment:
       - PORT=8080
     labels:
