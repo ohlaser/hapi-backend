@@ -1,0 +1,16 @@
+log:
+  level: INFO
+
+# docker-compose.yml側で設定済み
+# api:
+#   dashboard: true
+# entryPoints:
+#   web:
+#     address: ":80"
+#   websecure:
+#     address: ":443"
+
+# providers:
+#   docker:
+#     # デフォルトのコンテナ公開設定
+#     exposedByDefault: false

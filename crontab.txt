@@ -1,1 +1,1 @@
-* * 1,16 * * php /var/hapi/scripts/olcTokenUpdate.php	# /var/spool/cron/crontabs/ubuntu ‚É’Ç‰Á‚·‚é
+* * 1,16 * * php /var/hapi/scripts/olcTokenUpdate.php	# /var/spool/cron/crontabs/ubuntu ‚É’Ç‰Á‚·‚é <= 2024.10.10’Ç‹L íœ—\’è 

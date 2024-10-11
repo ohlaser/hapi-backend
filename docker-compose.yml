@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  # リバースプロキシ、SSL設定、システム監視。その他にも色々ある模様
+  reverse-proxy:
+    image: traefik:v3.1
+
+    # Enables the web UI and tells Traefik to listen to docker
+    command: 
+      # ダッシュボードの使用 (暫定)
+      - "--api.insecure=true"
+      # dockerコンテナの動向を検出する
+      - "--providers.docker=true"
+      # ポート設定
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # SSL証明書作成についてTLSチャレンジを選択 (自己証明書はtreafikが自分で用意)
+      - "--certificatesresolvers.appresolver.acme.tlschallenge=true"
+      # SSL関連のお知らせ通知用メールアドレス
+      - "--certificatesresolvers.appresolver.acme.email=soft@oh-laser.com"
+      # 証明書情報の格納先
+      - "--certificatesresolvers.appresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The HTTPS port
+      - "443:443"
+    volumes: 
+      # So that Traefik can listen to the Docker events
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./data/traefik/acme.json:/letsencrypt/acme.json"
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml"
+    networks:
+      - web
+
+# HAPIアプリケーション
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile 
+    environment:
+      - PORT=8080
+    labels:
+      - "traefik.http.routers.app.rule=Host(ytwv8sek59ictf9p.oh-laser.com)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.routers.app.tls.certresolver=appresolver"
+      # - "traefik.enable=true"
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+
