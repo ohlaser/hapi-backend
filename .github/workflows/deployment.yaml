@@ -5,7 +5,7 @@ on:
       - deploy
       
 env:
-  IMAGE_TAG: $(github.sha)
+  IMAGE_TAG: ${{ github.sha }}
   
 jobs:
   # 
@@ -14,6 +14,9 @@ jobs:
 
     env:
       IMAGE_NAME: hapi-backend
+
+      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
     steps:
       # リポジトリをチェックアウト
       - name: Checkout code
@@ -21,10 +24,10 @@ jobs:
 
       # dockerイメージビルドしてレジストリにプッシュ
       - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "$DOCKER_PAT" | docker login -u "$DOCKER_USERNAME" --password-stdin
         
       - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
+        run: cd app/ && docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
       - name: Push Docker image to Docker Hub
         run: docker push $IMAGE_NAME:$IMAGE_TAG
@@ -37,12 +40,24 @@ jobs:
     env:
       SETTING_DIR: /hapi/
       LETSENCRYPT_CASERVER: https://acme-v02.api.letsencrypt.org/directory
+
+      # SECRETSを直接参照できない仕様の模様なので移し替える
+      PROD_SERVER_SSH_PRIVATE_KEY: ${{ secrets.PROD_SERVER_SSH_PRIVATE_KEY }}
+      PROD_SERVER_ADDRESS: ${{ secrets.PROD_SERVER_ADDRESS }}
+      PROD_SERVER_SSH_USER: ${{ secrets.PROD_SERVER_SSH_USER }}
+      FAIL_SERVER_SSH_PRIVATE_KEY: ${{ secrets.FAIL_SERVER_SSH_PRIVATE_KEY }}
+      FAIL_SERVER_ADDRESS: ${{ secrets.FAIL_SERVER_ADDRESS }}
+      FAIL_SERVER_SSH_USER: ${{ secrets.FAIL_SERVER_SSH_USER }}
     strategy:
       # 並列実行
       matrix:
-        SSH_PRIVATE_KEY: [${{ secrets.PROD_SERVER_SSH_PRIVATE_KEY }}, ${{ secrets.FAIL_SERVER_SSH_PRIVATE_KEY }}]
-        SSH_SERVER: [${{ secrets.PROD_SERVER_ADDRESS }}, ${{ secrets.FAIL_SERVER_ADDRESS }}]
-        SSH_USER: [${{ secrets.PROD_SERVER_SSH_USER }}, ${{ secrets.FAIL_SERVER_SSH_USER }}]
+        include:
+          - SSH_PRIVATE_KEY: $PROD_SERVER_SSH_PRIVATE_KEY
+            SSH_SERVER: $PROD_SERVER_ADDRESS
+            SSH_USER: $PROD_SERVER_SSH_USER
+          - SSH_PRIVATE_KEY: $FAIL_SERVER_SSH_PRIVATE_KEY
+            SSH_SERVER: $FAIL_SERVER_ADDRESS
+            SSH_USER: $FAIL_SERVER_SSH_USER
     
     steps:
       # リポジトリをチェックアウト
