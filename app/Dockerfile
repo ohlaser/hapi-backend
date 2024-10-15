@@ -39,12 +39,12 @@ RUN php -r \
         echo 'Installer corrupt'; \
         unlink('composer-setup.php'); \
     } \
-     echo PHP_EOL; \
-     " \
-     && php composer-setup.php \
-     && php -r "unlink('composer-setup.php');"
+    echo PHP_EOL; \
+    " \
+    && php composer-setup.php \
+    && php -r "unlink('composer-setup.php');" \
+    && php composer.phar install --no-dev --prefer-dist --no-progress --optimize-autoloader
 
-RUN composer install --no-dev --prefer-dist --no-progress --no-suggest --optimize-autoloader
 COPY vendor/* /var/hapi/www/html/api/vendor/
 
 # TODO: ファイルシステム権限関係
