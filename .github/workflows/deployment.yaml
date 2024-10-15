@@ -36,6 +36,7 @@ jobs:
     needs: build_and_push
     env:
       SETTING_DIR: /hapi/
+      LETSENCRYPT_CASERVER: https://acme-v02.api.letsencrypt.org/directory
     strategy:
       # 並列実行
       matrix:
@@ -64,8 +65,9 @@ jobs:
           ssh -i $SSH_PRIVATE_KEY $SSH_USER@$SSH_SERVER << EOF
             cd $SETTING_DIR 
             && HAPI_APP_IMAGE_TAG=$IMAGE_TAG
-            && sudo docker compose pull
-            && sudo docker compose down
-            && sudo docker compose up -d
+            && LETSENCRYPT_CASERVER=$LETSENCRYPT_CASERVER
+            && docker compose pull
+            && docker compose down
+            && docker compose up -d
           EOF
 

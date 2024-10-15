@@ -20,6 +20,8 @@ services:
       - "--certificatesresolvers.appresolver.acme.email=soft@oh-laser.com"
       # 証明書情報の格納先
       - "--certificatesresolvers.appresolver.acme.storage=/letsencrypt/acme.json"
+      # caサーバーの設定 (ステージング環境か否か)
+      - "--certificatesresolvers.mycluster.acme.caserver=${LETSENCRYPT_CASERVER}"
     ports:
       # The HTTP port
       - "80:80"
@@ -37,7 +39,6 @@ services:
   app:
     image: ohlaser/hapi-backend:${HAPI_APP_IMAGE_TAG}
     environment:
-      - PORT=8080
     labels:
       - "traefik.http.routers.app.rule=Host(ytwv8sek59ictf9p.oh-laser.com)"
       - "traefik.http.routers.app.entrypoints=websecure"
