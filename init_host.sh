@@ -14,5 +14,7 @@ sudo mkdir /hapi/traefik/data/ -p
 sudo touch /hapi/traefik/data/acme.json
 
 # github actionsで使用するユーザーの作成
-useradd -G docker github-actions
+useradd -G docker -m github-actions
 chown -R github-actions:github-actions /hapi
+
+# 公開sshキーの設定..

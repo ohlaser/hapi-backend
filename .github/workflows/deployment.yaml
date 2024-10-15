@@ -27,10 +27,10 @@ jobs:
         run: echo "$DOCKER_PAT" | docker login -u "$DOCKER_USERNAME" --password-stdin
         
       - name: Build Docker image
-        run: cd app/ && docker build -t $IMAGE_NAME:$IMAGE_TAG .
+        run: cd app/ && docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: Push Docker image to Docker Hub
-        run: docker push $IMAGE_NAME:$IMAGE_TAG
+        run: docker push $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG
 
 
   # 各サーバーに更新を適用
@@ -68,16 +68,17 @@ jobs:
         run: echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       #サーバーにデプロイ ホストマシン設定ファイル
-      - name: Deploy to Production Server for host settings
+      - name: Deploy to Server for host settings
         run: |
-          scp -i $SSH_PRIVATE_KEY \
-            docker-compose.yml, traefik/traefik.yml \
-            $SSH_USER@$SSH_SERVER:$SETTING_DIR
+          echo ${{ matrix.SSH_PRIVATE_KEY }} > pkey.txt \
+          && scp -i pkey.txt \
+            docker-compose.yml traefik/traefik.yml \
+            ${{ matrix.SSH_USER }}@${{ matrix.SSH_SERVER }}:$SETTING_DIR
 
       # サーバーにデプロイ dockerコンテナ
-      - name: Deploy to Production Server for docker containers
+      - name: Deploy to Server for docker containers
         run: |
-          ssh -i $SSH_PRIVATE_KEY $SSH_USER@$SSH_SERVER << EOF
+          ssh -i pkey.txt ${{ matrix.SSH_USER }}@${{ matrix.SSH_SERVER }} << EOF
             cd $SETTING_DIR 
             && HAPI_APP_IMAGE_TAG=$IMAGE_TAG
             && LETSENCRYPT_CASERVER=$LETSENCRYPT_CASERVER
