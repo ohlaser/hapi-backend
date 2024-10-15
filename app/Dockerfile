@@ -1,8 +1,9 @@
 FROM ubuntu/apache2
 
 RUN apt update && apt install -y \
-    rsync \
+    # rsync \
     php \
+    ca-certificates \
     libapache2-mod-php \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
@@ -18,12 +19,16 @@ RUN apt update && apt install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # PHPの設定を有効化
-RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") && a2enmod php$PHP_VERSION
-RUN a2enmod rewrite
+RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") \
+    && a2enmod php$PHP_VERSION \
+    && a2enmod rewrite
 
 # gitリポジトリを展開
 RUN mkdir /var/hapi
-COPY app/var/ /var/hapi
+COPY var/hapi/ /var/
+
+# 設定ファイルをコピーして適用 
+COPY etc/apache2/* /etc/apache2/
 
 # php composer の準備、実行
 RUN php -r \
@@ -35,16 +40,12 @@ RUN php -r \
         unlink('composer-setup.php'); \
     } \
      echo PHP_EOL; \
-     "
-RUN php composer-setup.php
-RUN php -r "unlink('composer-setup.php');"
+     " \
+     && php composer-setup.php \
+     && php -r "unlink('composer-setup.php');"
 
-RUN cd app/ && composer install --no-dev --prefer-dist --no-progress --no-suggest --optimize-autoloader
-COPY app/vendor/* /var/hapi/www/html/api/vendor/
-
-# 設定ファイルをコピーして適用 
-COPY apache2.conf /etc/apache2/apache2.conf
-COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
+RUN composer install --no-dev --prefer-dist --no-progress --no-suggest --optimize-autoloader
+COPY vendor/* /var/hapi/www/html/api/vendor/
 
 # TODO: ファイルシステム権限関係
 # ...
