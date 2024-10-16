@@ -1,0 +1,25 @@
+version: 3.3
+
+services:
+  traefik:
+    image: "traefik:v3.1"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.caserver=${LETSENCRYPT_CASERVER:-https://acme-staging-v02.api.letsencrypt.org/directory}"
+      - "--certificatesresolvers.myresolver.acme.email=soft@oh-laser.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "11080:80"
+      - "11443:443"
+    volumes:
+      #- "./traefik/traefik.yml:/etc/traefik/traefik.yml"
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"

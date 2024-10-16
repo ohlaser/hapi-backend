@@ -17,4 +17,4 @@ sudo touch /hapi/traefik/data/acme.json
 useradd -G docker -m github-actions
 chown -R github-actions:github-actions /hapi
 
-# 公開sshキーの設定..
+# 公開sshキー、ホストキーの設定..

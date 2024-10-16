@@ -1,22 +1,21 @@
 name: Deploy
 on: 
-  push:
-    branches:
-      - deploy
-      
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - deploy
+
 env:
   IMAGE_TAG: ${{ github.sha }}
+  DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   
 jobs:
-  # 
   build_and_push:
     runs-on: ubuntu-latest
 
     env:
       IMAGE_NAME: hapi-backend
-
-      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
     steps:
       # リポジトリをチェックアウト
       - name: Checkout code
@@ -27,11 +26,10 @@ jobs:
         run: echo "$DOCKER_PAT" | docker login -u "$DOCKER_USERNAME" --password-stdin
         
       - name: Build Docker image
-        run: cd app/ && docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+        run: cd app/ && docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG -t $DOCKER_USERNAME/$IMAGE_NAME:latest .
 
       - name: Push Docker image to Docker Hub
-        run: docker push $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG
-
+        run: docker push $DOCKER_USERNAME/$IMAGE_NAME --all-tags
 
   # 各サーバーに更新を適用
   deploy:
@@ -40,6 +38,7 @@ jobs:
     env:
       SETTING_DIR: /hapi/
       LETSENCRYPT_CASERVER: https://acme-v02.api.letsencrypt.org/directory
+      KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
 
       # SECRETSを直接参照できない仕様の模様なので移し替える
       PROD_SERVER_SSH_PRIVATE_KEY: ${{ secrets.PROD_SERVER_SSH_PRIVATE_KEY }}
@@ -65,15 +64,21 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "$DOCKER_PAT" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+      # ホストキーの登録とsshキーの設定
+      - name: Register known hosts
+        run: |
+          mkdir -p ~/.ssh/ \
+          && echo "$KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts \
+          && echo "${{ matrix.SSH_PRIVATE_KEY }}" | tr -d '\r' > pkey.txt \
+          && chmod 600 pkey.txt
 
       #サーバーにデプロイ ホストマシン設定ファイル
       - name: Deploy to Server for host settings
         run: |
-          echo "${{ matrix.SSH_PRIVATE_KEY }}" | tr -d '\r' > pkey.txt \
-          && cat pkey.txt \
-          && scp -i pkey.txt \
-            docker-compose.yml traefik/traefik.yml \
+          scp -i pkey.txt -r \
+            docker-compose.yml traefik/ \
             ${{ matrix.SSH_USER }}@${{ matrix.SSH_SERVER }}:$SETTING_DIR
 
       # サーバーにデプロイ dockerコンテナ
@@ -81,10 +86,11 @@ jobs:
         run: |
           ssh -i pkey.txt ${{ matrix.SSH_USER }}@${{ matrix.SSH_SERVER }} << EOF
             cd $SETTING_DIR 
-            && HAPI_APP_IMAGE_TAG=$IMAGE_TAG
-            && LETSENCRYPT_CASERVER=$LETSENCRYPT_CASERVER
-            && docker compose pull
-            && docker compose down
-            && docker compose up -d
+            export HAPI_APP_IMAGE_TAG=$IMAGE_TAG 
+            export LETSENCRYPT_CASERVER=$LETSENCRYPT_CASERVER
+            echo "$DOCKER_PAT" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker compose pull
+            docker compose down
+            docker compose up -d
           EOF
 

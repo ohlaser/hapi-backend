@@ -59,7 +59,7 @@ class Resources
     {
         // OLC database informations
         $olcdb = [];
-        $olcdb['dsn'] = 'mysql:host=153.127.49.86;dbname=ol_kokyaku;port=3306';
+        $olcdb['dsn'] = 'mysql:host=host.docker.internal;dbname=ol_kokyaku;port=3306';
         $olcdb['username'] = 'remote_user';
         $olcdb['password'] = 'UGABDc5ktVPmVszjXsEDGfre3Jwk5RUd';
         $olcdb['options'] = [
