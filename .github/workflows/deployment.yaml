@@ -70,7 +70,8 @@ jobs:
       #サーバーにデプロイ ホストマシン設定ファイル
       - name: Deploy to Server for host settings
         run: |
-          echo ${{ matrix.SSH_PRIVATE_KEY }} > pkey.txt \
+          echo "${{ matrix.SSH_PRIVATE_KEY }}" | tr -d '\r' > pkey.txt \
+          && cat pkey.txt \
           && scp -i pkey.txt \
             docker-compose.yml traefik/traefik.yml \
             ${{ matrix.SSH_USER }}@${{ matrix.SSH_SERVER }}:$SETTING_DIR
