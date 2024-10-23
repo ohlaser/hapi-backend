@@ -5,6 +5,7 @@ sudo apt update
 sudo apt install mariadb-server
 # TODO:
 # https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04-ja
+# mysqlリモートユーザーの作成..
 
 # TODO: dockerインストール
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-ja
@@ -17,4 +18,6 @@ sudo touch /hapi/traefik/data/acme.json
 useradd -G docker -m github-actions
 chown -R github-actions:github-actions /hapi
 
-# 公開sshキー、ホストキーの設定..
+# 公開sshキー、ホストキーの設定
+# iptables.v4ファイルの適用
+sudo apt install iptables-persistent

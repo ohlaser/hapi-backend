@@ -1,0 +1,33 @@
+# ホストマシンや直接ラベリングできないコンテナについてここでルーティング設定
+
+http:
+  routers:
+    cms-oh-laser-router:
+      rule: "Host(`cms.oh-laser.com`)"
+      entryPoints:
+        - web
+        - websecure
+      service: cms-oh-laser
+      tls: 
+        certresolver: "dnsresolver"
+      
+    workflow-oh-laser-router:
+      rule: "Host(`workflow.oh-laser.com`)"
+      entryPoints:
+        - web
+        - websecure
+      service: workflow-oh-laser
+      tls: 
+        certresolver: "dnsresolver"
+
+  services:
+    cms-oh-laser:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:10080"
+          
+    workflow-oh-laser:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8080"
+

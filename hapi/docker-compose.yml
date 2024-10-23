@@ -8,4 +8,4 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.hapi.rule=Host(`ytwv8sek59ictf9p.oh-laser.com`)"
       - "traefik.http.routers.hapi.entrypoints=websecure"
-      - "traefik.http.routers.hapi.tls.certresolver=myresolver"
+      - "traefik.http.routers.hapi.tls.certresolver=dnsresolver"
