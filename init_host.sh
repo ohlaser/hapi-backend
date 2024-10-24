@@ -21,3 +21,5 @@ chown -R github-actions:github-actions /hapi
 # 公開sshキー、ホストキーの設定
 # iptables.v4ファイルの適用
 sudo apt install iptables-persistent
+
+# 非同期レプリケーション設定をマスター側、スレーブ側でそれぞれ行う

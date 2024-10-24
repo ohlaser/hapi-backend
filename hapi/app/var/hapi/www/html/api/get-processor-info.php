@@ -91,8 +91,8 @@ class ProcessorInfoGetter
     {
         $result = null;
 
-        // OLC APIから取得可能な情報を得る
-        $olcJson = $this->getOlcDataAsJson();
+        // OLC API(の代替)から取得可能な情報を得る
+        $olcJson = $this->getProcessorCoreDataAsJson();
 
         if ($olcJson) {
             $olcJson = $this->overrideMaintDataIfRequired($olcJson);
@@ -153,47 +153,61 @@ class ProcessorInfoGetter
     }
 
     /**
-     * OLCデータをjsonデータとして取得
+     * とりあえずOLC APIの代替。もっと効率的にできる可能性あり。
      */
-    private function getOlcDataAsJson()
+    private function getProcessorCoreDataAsJson()
     {
-        global $backendDir;
-        $token_file = $backendDir.'/data/tokens';
-        
-        // OLCトークンの取得
-        $olcApi = new OlcApi();
+        $olcdb = Resources::$olcdb;
+        $pdo = new PDO(
+            $olcdb['dsn'], 
+            $olcdb['username'], 
+            $olcdb['password'], 
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+            
+        $sql = <<<SQL
+			SELECT
+                o.delivery_date, 
+				mp1.prod_cd,
+				mt.expiration_date 
+			FROM 
+				t_maintenance AS mt 
+			LEFT JOIN 
+				t_order_detail AS od 
+			ON 
+				mt.order_id = od.order_id 
+				AND 
+				mt.detail_id = od.detail_id
+				AND
+				od.del_flg = 0
+			LEFT JOIN
+				m_product AS mp1 -- 保守プラン用
+			ON
+				mt.plan_id = mp1.prod_id
+			LEFT JOIN
+				t_order AS o
+			ON
+				od.order_id = o.order_id
+				AND
+				o.del_flg = 0
+			WHERE
+				od.proc_no = :proc_no 
+				AND 
+				mt.del_flg = 0
+			ORDER BY 
+				mt.expiration_date DESC
+			LIMIT 
+				1;
+			SQL;
 
-        $pickedToken = null;
-        $longestLifeTime = 0;
-        foreach ($olcApi->GetTokens(true, true)->tokens as $token)
-        {
-            $endOfExpiry = strtotime($token->end);
-            if ($endOfExpiry > $longestLifeTime)
-            {
-                $pickedToken = $token->token;
-                $longestLifeTime = $endOfExpiry;
-            }
-        }
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['proc_no' => (int)$this->procNum]);
+        $line = $stmt->fetch();
 
-        // トークンとともに取得処理を実行
-        $url = 'https://cms.oh-laser.com/api/maintenance';
-        $params = array(
-            'proc_no' => (int)$this->procNum,
-        );
-        $query = http_build_query($params);
-        $url .= '?' . $query;
-        
-        $opts = array(
-            'http' => array(
-                'method'  => 'GET',
-                'header' => "Authorization: Bearer $pickedToken\r\n"
-            )
-        );
-        $context = stream_context_create($opts);
-        $result = file_get_contents($url, false, $context);
-
-        // すでにJson
-        return $result;
+        return $line ? json_encode($line) : null;
     }
 
     /**
