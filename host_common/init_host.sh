@@ -1,4 +1,5 @@
 # ホストマシンの初期化
+# 実際に直接このスクリプトを実行することはおそらくないが目安として記述
 sudo apt update
 
 # mysqlインストール
@@ -22,4 +23,5 @@ chown -R github-actions:github-actions /hapi
 # iptables.v4ファイルの適用
 sudo apt install iptables-persistent
 
+# host-***/app/ ディレクトリ内の各ファイルを該当サーバーにコピー
 # 非同期レプリケーション設定をマスター側、スレーブ側でそれぞれ行う
