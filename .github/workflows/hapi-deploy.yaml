@@ -25,7 +25,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SETTING_DIR: ${{ inputs.devenv && '/hapi_dev' || '/hapi' }}
+      SETTING_DIR: ${{ inputs.devenv && '/srv/hapi_dev' || '/srv/hapi' }}
       X_ENVIRONMENT: ${{ inputs.devenv && 'MVsCwrG06htxHLBx8RvqiA==' || 'IEJFDm6wI+eI5vpvOR9eHQ==' }}
       CONTAINER_NAME_SUFFIX: ${{ inputs.devenv && 'dev' || 'prod' }} 
       KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}

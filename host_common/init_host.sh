@@ -12,12 +12,11 @@ sudo apt install mariadb-server
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-ja
 
 # その他必要なディレクトリ、ファイルの作成
-sudo mkdir /hapi/traefik/data/ -p
-sudo touch /hapi/traefik/data/acme.json
+sudo mkdir /srv/hapi /srv/hapi_dev /srv/traefik -p
 
 # github actionsで使用するユーザーの作成
 useradd -G docker -m github-actions
-chown -R github-actions:github-actions /hapi
+chown -R github-actions:github-actions /srv/* -R
 
 # 公開sshキー、ホストキーの設定
 # iptables.v4ファイルの適用

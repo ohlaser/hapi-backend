@@ -11,7 +11,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SETTING_DIR: /traefik
+      SETTING_DIR: /srv/traefik
       LETSENCRYPT_CASERVER: https://acme-v02.api.letsencrypt.org/directory
       CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
       KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
@@ -45,7 +45,7 @@ jobs:
         run: |
           scp -i pkey.txt -r \
             traefik/docker-compose.yml \
-            traefik/traefik.yml \
+            traefik/dynamic.yml \
             .env \
             ${{ env.SSH_USER }}@${{ env.SSH_SERVER }}:$SETTING_DIR
 
