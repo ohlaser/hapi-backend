@@ -19,6 +19,10 @@ jobs:
     env:
       IMAGE_NAME: hapi-backend
     steps:
+      # コミットハッシュの短縮形を取得
+      - name: Get short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::16}" >> $GITHUB_ENV
+
       # リポジトリをチェックアウト
       - name: Checkout code
         uses: actions/checkout@v3

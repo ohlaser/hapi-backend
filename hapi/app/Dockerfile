@@ -53,16 +53,16 @@ RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") \
 
 # gitリポジトリを展開
 RUN mkdir /var/hapi
-COPY var/hapi/* /var/hapi/
+COPY var/hapi/ /var/hapi/
 
 # 設定ファイルをコピーして適用 
-COPY etc/apache2/* /etc/apache2/
+COPY etc/apache2/ /etc/apache2/
 
 # 中間イメージからコピー
 RUN mkdir -p /var/hapi/www/html/api/vendor/
-COPY --from=builder /vendor/* /var/hapi/www/html/api/vendor/
+COPY --from=builder /vendor/ /var/hapi/www/html/api/vendor/
 
-#RUN /var/hapi/scripts/testmode.sh disable
+RUN cd /var/hapi/scripts/ && chmod 744 ./testmode.sh && ./testmode.sh disable
 
 # TODO: ファイルシステム権限関係
 # ...
