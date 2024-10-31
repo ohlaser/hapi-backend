@@ -2,10 +2,10 @@ version: "3.3"
 
 services:
   hapi:
-    image: ohlaser/hapi-backend:${HAPI_APP_IMAGE_TAG:-latest}
-    container_name: "haruka-api"
+    image: ohlaser/hapi-backend:${HAPI_APP_IMAGE_TAG}
+    container_name: "haruka-api-${HAPI_APP_NAME_SUFFIX}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.hapi.rule=Host(`ytwv8sek59ictf9p.oh-laser.com`)"
+      - "traefik.http.routers.hapi.rule=Host(`ytwv8sek59ictf9p.oh-laser.com`) && HeaderExists(X-Environment, ${X_ENVIRONMENT})"
       - "traefik.http.routers.hapi.entrypoints=websecure"
       - "traefik.http.routers.hapi.tls.certresolver=dnsresolver"

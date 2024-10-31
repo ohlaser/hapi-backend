@@ -13,13 +13,16 @@ services:
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.httpresolver.acme.dnschallenge=true"
-      - "--certificatesresolvers.httpresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.httpresolver.acme.caserver=${LETSENCRYPT_CASERVER:-https://acme-staging-v02.api.letsencrypt.org/directory}"
+      - "--certificatesresolvers.httpresolver.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.httpresolver.acme.caserver=${LETSENCRYPT_CASERVER}"
       - "--certificatesresolvers.httpresolver.acme.email=soft@oh-laser.com"
       - "--certificatesresolvers.httpresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      - CF_API_EMAIL: "soft@oh-laser.com"
+      - CF_DNS_API_TOKEN: ${CLOUDFLARE_API_KEY}
     volumes:
       #- "./traefik.yml:/etc/traefik/traefik.yml"
       - "./dynamic.yml:/dynamic.yml"

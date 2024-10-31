@@ -62,6 +62,8 @@ COPY etc/apache2/* /etc/apache2/
 RUN mkdir -p /var/hapi/www/html/api/vendor/
 COPY --from=builder /vendor/* /var/hapi/www/html/api/vendor/
 
+RUN /var/hapi/scripts/testmode.sh disable
+
 # TODO: ファイルシステム権限関係
 # ...
 

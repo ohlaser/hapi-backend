@@ -11,7 +11,7 @@ $masterServer = '153.127.49.86'; // マスターサーバーのIPアドレス
 $failoverIP = '133.18.178.152'; // フェイルオーバーサーバーのIPアドレス
 $zoneID = '74f3e595ec3c57635eb2448833023148'; // CloudflareのゾーンID
 $dnsRecordID = 'd9668fbfc67fa4abd587443ee04bf998'; // 更新するDNSレコードのID
-$apiToken = 'sq9Hi3DCioK-fvBWdmi3LFIzBCBkpqwJMdbQEEO7'; // Cloudflare APIトークン
+$apiToken = getenv('CLOUDFLARE_API_KEY'); // Cloudflare APIトークン
 $domainName = 'ytwv8sek59ictf9p.oh-laser.com'; // 監視するドメイン名
 
 
