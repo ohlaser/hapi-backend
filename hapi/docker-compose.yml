@@ -6,6 +6,6 @@ services:
     container_name: "haruka-api-${HAPI_APP_NAME_SUFFIX}"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.hapi.rule=Host(`ytwv8sek59ictf9p.oh-laser.com`) && HeaderExists(X-Environment, ${X_ENVIRONMENT})"
+      - "traefik.http.routers.hapi.rule=Host(`ytwv8sek59ictf9p.oh-laser.com`) && Header(`X-Environment`, `${X_ENVIRONMENT}`)"
       - "traefik.http.routers.hapi.entrypoints=websecure"
       - "traefik.http.routers.hapi.tls.certresolver=dnsresolver"
