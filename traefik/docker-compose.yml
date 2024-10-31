@@ -1,4 +1,4 @@
-version: 3.3
+version: "3.3"
 
 services:
   traefik:
@@ -21,8 +21,8 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - CF_API_EMAIL: "soft@oh-laser.com"
-      - CF_DNS_API_TOKEN: ${CLOUDFLARE_API_KEY}
+      CF_API_EMAIL: "soft@oh-laser.com"
+      CF_DNS_API_TOKEN: "${CLOUDFLARE_API_KEY}"
     volumes:
       #- "./traefik.yml:/etc/traefik/traefik.yml"
       - "./dynamic.yml:/dynamic.yml"

@@ -28,7 +28,7 @@ jobs:
         run: echo "$DOCKER_PAT" | docker login -u "$DOCKER_USERNAME" --password-stdin
         
       - name: Build Docker image
-        run: cd app/ && docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+        run: cd hapi/app/ && docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: Push Docker image to Docker Hub
         run: docker push $DOCKER_USERNAME/$IMAGE_NAME --all-tags 

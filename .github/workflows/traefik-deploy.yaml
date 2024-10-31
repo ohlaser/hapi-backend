@@ -11,7 +11,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SETTING_DIR: /traefik/
+      SETTING_DIR: /traefik
       LETSENCRYPT_CASERVER: https://acme-v02.api.letsencrypt.org/directory
       CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
       KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
@@ -37,14 +37,16 @@ jobs:
       - name: Generate environment file.
         run: |
           touch .env \
-          echo 'LETSENCRYPT_CASERVER='$LETSENCRYPT_CASERVER >> .env \
-          echo 'CLOUDFLARE_API_KEY='$CLOUDFLARE_API_KEY >> .env
+          && echo 'LETSENCRYPT_CASERVER='$LETSENCRYPT_CASERVER >> .env \
+          && echo 'CLOUDFLARE_API_KEY='$CLOUDFLARE_API_KEY >> .env
 
       #サーバーにデプロイ ホストマシン設定ファイル
       - name: Deploy to Server for host settings
         run: |
           scp -i pkey.txt -r \
-            docker-compose.yml traefik.yml .env \
+            traefik/docker-compose.yml \
+            traefik/traefik.yml \
+            .env \
             ${{ env.SSH_USER }}@${{ env.SSH_SERVER }}:$SETTING_DIR
 
       # サーバーにデプロイ dockerコンテナ

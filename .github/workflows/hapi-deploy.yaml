@@ -52,15 +52,16 @@ jobs:
       - name: Generate environment file.
         run: |
           touch .env \
-          echo 'HAPI_APP_IMAGE_TAG='$IMAGE_TAG >> .env \
-          echo 'X_ENVIRONMENT='$X_ENVIRONMENT >> .env \
-          echo 'HAPI_APP_NAME_SUFFIX='$CONTAINER_NAME_SUFFIX >> .env
+          && echo 'HAPI_APP_IMAGE_TAG='$IMAGE_TAG >> .env \
+          && echo 'X_ENVIRONMENT='$X_ENVIRONMENT >> .env \
+          && echo 'HAPI_APP_NAME_SUFFIX='$CONTAINER_NAME_SUFFIX >> .env
 
       #サーバーにデプロイ ホストマシン設定ファイル
       - name: Deploy to Server for host settings
         run: |
           scp -i pkey.txt -r \
-            docker-compose.yml .env \
+            hapi/docker-compose.yml \
+            .env \
             ${{ env.SSH_USER }}@${{ env.SSH_SERVER }}:$SETTING_DIR/
 
       # サーバーにデプロイ dockerコンテナ

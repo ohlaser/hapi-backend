@@ -53,7 +53,7 @@ RUN PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;") \
 
 # gitリポジトリを展開
 RUN mkdir /var/hapi
-COPY var/hapi/ /var/
+COPY var/hapi/* /var/hapi/
 
 # 設定ファイルをコピーして適用 
 COPY etc/apache2/* /etc/apache2/
