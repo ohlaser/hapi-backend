@@ -10,6 +10,14 @@ http:
       service: cms-oh-laser
       tls: 
         certresolver: "dnsresolver"
+        
+    # host-service-router:
+    #   rule: "HostRegexp(`.+`)"
+    #   entryPoints:
+    #     - web
+    #     - websecure
+    #   service: cms-oh-laser
+    #   priority: 1
       
     workflow-oh-laser-router:
       rule: "Host(`workflow.oh-laser.com`)"

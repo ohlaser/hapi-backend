@@ -1,4 +1,78 @@
+#!/bin/bash
 # gh workflow run コマンドのユーティリティ
+
+push() {
+    workflow=
+    dev=false
+    while [["$1" != ""]]; do
+        case "$1" in
+            --target=*)
+                target="${1#*=}"
+                if [[ "$target" = "hapi" ]]; then
+                    workflow=hapi-push.yml
+                else
+                    echo "Error: Invalid target."
+                    return 1
+                fi
+                ;;
+            --dev)
+                dev=true
+                ;;
+            *)
+                echo "Invalid option: $1"
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    gh workflow run $workflow --field dev=$dev
+    $target
+}
+
+deploy() {
+    workflow=
+    devenv=false
+    devimg=false
+    fo_server=false
+
+    while [["$1" != ""]]; do
+        case "$1" in
+            --target=*)
+                target="${1#*=}"
+                if [[ "$target" = "hapi" ]]; then
+                    workflow=hapi-deploy.yml
+                elif [[ "$target" = "traefik" ]]; then
+                    workflow=traefik-deploy.yml
+                else
+                    echo "Error: Invalid target."
+                    return 1
+                fi
+                ;;
+            # TODO: 残りの引数..
+            *)
+                echo "Invalid option: $1"
+                return 1
+                ;;
+        esac
+        shift
+    done
+
+    # TODO: 最終的なコマンド実行..
+}
+
+case "$1" in
+    push)
+        push
+        ;;
+    deploy)
+        deploy
+        ;;
+    *)
+        echo "Usage: $0 {push|deploy}"
+        exit 1
+        ;;
+esac
 
 # プッシュ
 # 	gh workflow run hapi-push --ref main --field dev=true
